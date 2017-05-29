@@ -543,6 +543,7 @@ void SExpressionWasmBuilder::parseFunction(Element& s, bool preParseImport) {
     im->base = importBase;
     im->kind = ExternalKind::Function;
     im->functionType = wasm.getFunctionType(type)->name;
+    if (wasm.getImportOrNull(im->name)) throw ParseException("duplicate import", s.line, s.col);
     wasm.addImport(im.release());
     if (currFunction) throw ParseException("import module inside function dec");
     assert(!currFunction);
@@ -1381,6 +1382,7 @@ void SExpressionWasmBuilder::parseMemory(Element& s, bool preParseImport) {
       im->module = importModule;
       im->base = importBase;
       im->name = importModule;
+      if (wasm.getImportOrNull(im->name)) throw ParseException("duplicate import", s.line, s.col);
       wasm.addImport(im.release());
       i++;
     } else {
@@ -1603,6 +1605,7 @@ void SExpressionWasmBuilder::parseImport(Element& s) {
       wasm.memory.max = atoi(inner[j++]->c_str());
     }
   }
+  if (wasm.getImportOrNull(im->name)) throw ParseException("duplicate import", s.line, s.col);
   wasm.addImport(im.release());
 }
 
@@ -1657,6 +1660,7 @@ void SExpressionWasmBuilder::parseGlobal(Element& s, bool preParseImport) {
     im->base = importBase;
     im->kind = ExternalKind::Global;
     im->globalType = type;
+    if (wasm.getImportOrNull(im->name)) throw ParseException("duplicate import", s.line, s.col);
     wasm.addImport(im.release());
     return;
   }
@@ -1669,6 +1673,7 @@ void SExpressionWasmBuilder::parseGlobal(Element& s, bool preParseImport) {
   }
   global->mutable_ = mutable_;
   if (i != s.size()) throw ParseException("extra import elements");
+  if (wasm.getGlobalOrNull(global->name)) throw ParseException("duplicate import", s.line, s.col);
   wasm.addGlobal(global.release());
 }
 
@@ -1703,6 +1708,7 @@ void SExpressionWasmBuilder::parseTable(Element& s, bool preParseImport) {
       im->module = importModule;
       im->base = importBase;
       im->name = importModule;
+      if (wasm.getImportOrNull(im->name)) throw ParseException("duplicate import", s.line, s.col);
       wasm.addImport(im.release());
       i++;
     } else {
