@@ -376,6 +376,7 @@ void SExpressionWasmBuilder::preParseFunctionType(Element& s) {
     if (need) {
       functionType->name = Name::fromInt(wasm.functionTypes.size());
       functionTypeNames.push_back(functionType->name);
+      if (wasm.getFunctionTypeOrNull(functionType->name)) throw ParseException("duplicate function type", s.line, s.col);
       wasm.addFunctionType(functionType.release());
     }
   }
@@ -1793,6 +1794,7 @@ void SExpressionWasmBuilder::parseType(Element& s) {
     type->name = Name::fromInt(wasm.functionTypes.size());
   }
   functionTypeNames.push_back(type->name);
+  if (wasm.getFunctionTypeOrNull(type->name)) throw ParseException("duplicate function type", s.line, s.col);
   wasm.addFunctionType(type.release());
 }
 
